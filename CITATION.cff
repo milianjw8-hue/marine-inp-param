@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "marine-inp-param (marinp): marine biogenic INP parameterizations, warm-temperature enhancement fitting and physics-constrained ML emulators"
+type: software
+authors:
+  - family-names: Cha
+    given-names: Joo Wan
+version: 0.1.0
+date-released: 2026-11-17
+license: MIT
+repository-code: "https://github.com/milianjw8-hue/marine-inp-param"
+keywords:
+  - ice nucleation
+  - INP
+  - sea spray aerosol
+  - cloud physics
+  - machine learning
