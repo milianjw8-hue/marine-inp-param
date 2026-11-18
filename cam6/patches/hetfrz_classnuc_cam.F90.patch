@@ -1,0 +1,72 @@
+--- a/src/physics/cam/hetfrz_classnuc_cam.F90
++++ b/src/physics/cam/hetfrz_classnuc_cam.F90
+@@ -30,6 +30,7 @@
+ use cam_abortutils, only: endrun
+ 
+ use hetfrz_classnuc,   only: hetfrz_classnuc_init, hetfrz_classnuc_calc
++use marine_inp_cam,    only: marinp_cam_readnl, marinp_active, marinp_frzimm   ! marinp
+ 
+ implicit none
+ private
+@@ -172,6 +173,8 @@
+   call mpibcast(hist_hetfrz_classnuc, 1, mpilog, 0, mpicom)
+ #endif
+ 
++  call marinp_cam_readnl()   ! marinp: reads ./marinp_in if present
++
+ end subroutine hetfrz_classnuc_cam_readnl
+ 
+ !================================================================================================
+@@ -252,6 +255,8 @@
+    call addfld('DSTFREZIMM', (/ 'lev' /), 'A', 'm-3s-1', 'dust immersion  freezing rate')
+    call addfld('DSTFREZCNT', (/ 'lev' /), 'A', 'm-3s-1', 'dust contact    freezing rate')
+    call addfld('DSTFREZDEP', (/ 'lev' /), 'A', 'm-3s-1', 'dust deposition freezing rate')
++   call addfld('MARFRZIMM',  (/ 'lev' /), 'A', 'm-3s-1', 'marine INP immersion freezing rate (marinp)')
++   call addfld('MARINP',     (/ 'lev' /), 'A', 'm-3',    'marine INP number at ambient T, in liquid cloud (marinp)')
+ 
+    call addfld('BCFREZIMM', (/ 'lev' /), 'A', 'm-3s-1', 'bc immersion  freezing rate')
+    call addfld('BCFREZCNT', (/ 'lev' /), 'A', 'm-3s-1', 'bc contact    freezing rate')
+@@ -621,6 +626,8 @@
+    real(r8) :: freqimm(pcols,pver), freqcnt(pcols,pver), freqdep(pcols,pver), freqmix(pcols,pver)
+    real(r8) :: nnuccc_bc(pcols,pver), nnucct_bc(pcols,pver), nnudep_bc(pcols,pver)
+    real(r8) :: nnuccc_dst(pcols,pver), nnucct_dst(pcols,pver), nnudep_dst(pcols,pver)
++   real(r8) :: frzmarimm(pcols,pver), marinp_n(pcols,pver)   ! marinp: m-3 s-1, m-3
++   real(r8) :: ss_ac, ss_co                                    ! marinp: sea salt (kg m-3)
+    real(r8) :: niimm_bc(pcols,pver), nicnt_bc(pcols,pver), nidep_bc(pcols,pver)
+    real(r8) :: niimm_dst(pcols,pver), nicnt_dst(pcols,pver), nidep_dst(pcols,pver)
+    real(r8) :: numice10s(pcols,pver)
+@@ -762,6 +769,8 @@
+    nnudep_bc(:,:) = 0._r8
+ 
+    nnuccc_dst(:,:) = 0._r8
++   frzmarimm(:,:) = 0._r8
++   marinp_n(:,:) = 0._r8
+    nnucct_dst(:,:) = 0._r8
+    nnudep_dst(:,:) = 0._r8
+ 
+@@ -805,6 +814,16 @@
+             call handle_errmsg(errstring, subname="hetfrz_classnuc_calc")
+ 
+             frzimm(i,k) = frzbcimm(i,k) + frzduimm(i,k)
++            ! marinp: deterministic marine INP immersion freezing, added to the CNT dust + BC rate
++            if (marinp_active() .and. (nmodes == MAM3_nmodes .or. nmodes == MAM4_nmodes)) then
++               ss_ac = aer(i,k,ncl_accum,lchnk) + aer_cb(i,k,ncl_accum,lchnk)
++               ss_co = aer(i,k,ncl_coarse,lchnk) + aer_cb(i,k,ncl_coarse,lchnk)
++               call marinp_frzimm(t(i,k), state%zm(i,k), ss_ac, ss_co, ncic*rho(i,k), &
++                    max(state%q(i,k,numice_idx), 0._r8)*rho(i,k)/lcldm(i,k), deltatin, &
++                    frzmarimm(i,k), marinp_n(i,k))
++               frzimm(i,k) = frzimm(i,k) + frzmarimm(i,k)*1.0e-6_r8   ! m-3 s-1 -> cm-3 s-1
++               frzmarimm(i,k) = frzmarimm(i,k)*ast(i,k)                ! grid-mean, like DSTFREZIMM
++            end if
+             frzcnt(i,k) = frzbccnt(i,k) + frzducnt(i,k)
+             frzdep(i,k) = frzbcdep(i,k) + frzdudep(i,k)
+ 
+@@ -848,6 +867,8 @@
+    call outfld('DSTFREZIMM', nnuccc_dst, pcols, lchnk)
+    call outfld('DSTFREZCNT', nnucct_dst, pcols, lchnk)
+    call outfld('DSTFREZDEP', nnudep_dst, pcols, lchnk)
++   call outfld('MARFRZIMM', frzmarimm, pcols, lchnk)
++   call outfld('MARINP', marinp_n, pcols, lchnk)
+ 
+    call outfld('BCFREZIMM', nnuccc_bc, pcols, lchnk)
+    call outfld('BCFREZCNT', nnucct_bc, pcols, lchnk)

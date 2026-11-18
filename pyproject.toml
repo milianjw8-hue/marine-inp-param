@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "marinp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Marine biogenic ice-nucleating particle parameterizations (W15, M18), warm-temperature enhancement fitting and physics-constrained ML emulators"
 readme = "README.md"
 license = { text = "MIT" }
@@ -19,7 +19,8 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+scam = ["xarray>=2023.1", "netCDF4>=1.6"]
+dev = ["pytest>=7", "xarray>=2023.1", "netCDF4>=1.6"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

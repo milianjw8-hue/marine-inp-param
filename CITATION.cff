@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: Cha
     given-names: Joo Wan
-version: 0.1.0
-date-released: 2026-11-17
+version: 0.2.0
+date-released: 2026-11-18
 license: MIT
 repository-code: "https://github.com/milianjw8-hue/marine-inp-param"
 keywords:

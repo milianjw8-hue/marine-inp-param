@@ -8,3 +8,5 @@ __pycache__/
 build/
 dist/
 .ipynb_checkpoints/
+*.mod
+*.o

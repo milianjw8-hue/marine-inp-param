@@ -68,6 +68,16 @@ $$K(T) = -\frac{\ln[1 - f(T)]}{V_{\mathrm{drop}}},\qquad N_{\mathrm{INP}}(T) = K
 
 $f$는 누적 동결 비율, $D$는 희석배수입니다. $f = 1$이면 값이 정의되지 않으므로 NaN(하한)으로 둡니다.
 
+## 6. 수치모델 연결: 결정론적 침적 결빙률
+
+Fortran 모듈(`fortran/marine_inp_mod.F90`)은 1~3절과 같은 식을 씁니다. 단, 유효 온도 범위 밖에서는 NaN 대신 0을 돌려줍니다.
+모델 안의 결빙률은 다음과 같습니다.
+
+$$R = \frac{\max\left(\min(n_{\mathrm{INP}}(T),\, N_c) - N_i,\ 0\right)}{\Delta t}$$
+
+$n_{\mathrm{INP}}(T)$는 누적 INP 수, $N_c$는 구름 안 물방울 수, $N_i$는 이미 있는 얼음 수, $\Delta t$는 시간 간격입니다(모두 구름 안, m⁻³).
+INP 스펙트럼이 누적값이므로, 이미 언 만큼은 다시 세지 않습니다. INP 소모와 수송을 예측하지 않는 단순한 방식이며, CAM6 연결 방법은 `cam6/README.md`에 있습니다.
+
 ## 참고 문헌
 
 - Wilson, T. W., et al. (2015). A marine biogenic source of atmospheric ice-nucleating particles. *Nature*, 525, 234–238. https://doi.org/10.1038/nature14986

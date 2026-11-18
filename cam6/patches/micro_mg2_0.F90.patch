@@ -1,0 +1,20 @@
+--- a/src/physics/cam/micro_mg2_0.F90
++++ b/src/physics/cam/micro_mg2_0.F90
+@@ -133,6 +133,8 @@
+      mi0, &
+      rising_factorial
+ 
++use marine_inp_cam, only: marinp_disable_hm   ! marinp: Hallett-Mossop on/off switch
++
+ implicit none
+ private
+ save
+@@ -1486,7 +1488,7 @@
+           qcic(1:mgncol,k), ncic(:,k), qsic(:,k), pgam(:,k), lamc(:,k), lams(:,k), n0s(:,k), &
+           psacws(:,k), npsacws(:,k), mgncol)
+ 
+-     if (do_cldice) then
++     if (do_cldice .and. .not. marinp_disable_hm) then   ! marinp: switch for the SIP experiment
+         call secondary_ice_production(t(:,k), psacws(:,k), msacwi(:,k), nsacwi(:,k), mgncol)
+      else
+         nsacwi(:,k) = 0.0_r8

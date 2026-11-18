@@ -73,10 +73,16 @@ inp = inp_enhanced(-15.0, 2e-7, ww)    # L^-1
 
 - W15는 해수표면미세층(SML) 시료로 만든 식입니다. 대기 중 SSA에 대해서는 과대 추정 경향이 보고돼 있습니다.
   가산항을 해석할 때 기준선의 이 편향을 함께 고려해야 합니다.
-- W15 유효 범위는 약 -27 ~ -6.5 °C로 두었고, 밖에서는 기본적으로 NaN을 돌려줍니다(`extrapolate=True`로 해제).
+- W15 유효 범위는 약 -27 ~ -6.5 °C로 두었고, 밖에서는 기본적으로 NaN을 돌려줍니다(`extrapolate=True`로 해제). Fortran 모듈은 모델에 NaN이 들어가지 않도록 범위 밖에서 0을 돌려줍니다.
 - M18의 유효 온도 범위는 원문으로 확인한 뒤 쓰세요. 코드의 기본 범위(-30 ~ -5 °C)는 넓게 잡은 값입니다.
 - INP 농도는 측정 조건 그대로의 L⁻¹입니다. 표준상태 환산은 하지 않습니다.
 - 이 저장소에는 **코드와 합성 자료만** 있습니다. 실제 관측 자료는 해당 논문의 자료 공개 경로를 따릅니다.
+
+## 수치모델 연결 (Fortran, CAM6/SCAM6)
+
+- `fortran/marine_inp_mod.F90`: 같은 식을 Fortran으로 옮긴 모듈입니다. 다른 모델에도 그대로 쓸 수 있습니다. Python과 같은 값을 내는지 시험합니다(`tests/test_fortran.py`, gfortran 필요).
+- `cam6/`: CESM2.1 CAM6 이질 결빙에 해양 INP 결빙률을 더하는 연결 모듈과 패치, SCAM6 M-PACE 실험 8개 스크립트입니다. 자세한 내용은 [`cam6/README.md`](cam6/README.md)를 보세요.
+- `marinp.scam`: SCAM6 실험 결과를 대조 실험, Hallett-Mossop 켬/끔과 비교합니다(`pip install -e ".[scam]"`).
 
 ## 방법
 
